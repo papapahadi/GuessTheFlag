@@ -35,6 +35,8 @@ struct ContentView: View {
     @State private var clickResult = ""
     @State private var showAlert = false
     @State private var score = 0
+    @State private var spinAmount = 0.0
+    @State private var tappedButtonIndex : Int?
     
     var body: some View {
         
@@ -54,9 +56,12 @@ struct ContentView: View {
                     
                     ForEach(0..<3){ number in
                         Button{
-                            checkClick(number)
+                                checkClick(number)
                         }label:{
                             FlagView(flag: flags[number])
+                                .rotation3DEffect(.degrees(number == correct ? spinAmount : 0), axis: /*@START_MENU_TOKEN@*/(x: 0.0, y: 1.0, z: 0.0)/*@END_MENU_TOKEN@*/)
+                                .opacity(tappedButtonIndex != nil && tappedButtonIndex != number ? 0.25 : 1 )
+                                .scaleEffect(tappedButtonIndex != nil && tappedButtonIndex != number ? 0.75 : 1)
                         }
                        
                     }
@@ -75,9 +80,13 @@ struct ContentView: View {
     }
     
     func checkClick(_ number: Int){
+        tappedButtonIndex = number
         if number == correct {
-            clickResult = "Correct"
-            score += 1
+            withAnimation(.easeIn(duration: 0.5)){
+                spinAmount += 360
+                clickResult = "Correct"
+                score += 1
+            }
         }
         else {
             clickResult = "Wrong"
@@ -89,6 +98,7 @@ struct ContentView: View {
     func askQuestion(){
         flags.shuffle()
         correct = Int.random(in: 0...2)
+        tappedButtonIndex = nil
     }
 }
 
